@@ -43,7 +43,6 @@ PRIMER_DATO_ES_PASO = True
 # Tamaño de ventana del filtro de media móvil
 VENTANA_MEDIA_MOVIL = 4
 
-
 class App:
     def __init__(self, root):
         self.root = root
