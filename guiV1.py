@@ -31,7 +31,7 @@ import serial.tools.list_ports as list_ports
 BAUDRATE = 9600
 
 # Escala inicial del mapa
-RANGO_MAX_CM_DEFAULT = 300
+RANGO_MAX_CM_DEFAULT = 175
 
 # Stepper
 PASOS_VUELTA = 200
@@ -41,7 +41,7 @@ PASOS_VUELTA = 200
 PRIMER_DATO_ES_PASO = True
 
 # Tamaño de ventana del filtro de media móvil
-VENTANA_MEDIA_MOVIL = 4
+VENTANA_MEDIA_MOVIL = 2
 
 class App:
     def __init__(self, root):
@@ -580,40 +580,40 @@ class App:
 
         if thetas:
             if self.var_us.get():
-                self.ax.plot(
+                self.ax.scatter(
                     thetas,
                     us,
-                    linewidth=1.2,
+                    s=12,
                     color="tab:blue",
                     label="Ultrasonido"
                 )
                 hay_senales = True
 
             if self.var_ir.get():
-                self.ax.plot(
+                self.ax.scatter(
                     thetas,
                     ir,
-                    linewidth=1.2,
+                    s=12,
                     color="tab:orange",
                     label="Infrarrojo"
                 )
                 hay_senales = True
 
             if self.var_laser.get():
-                self.ax.plot(
+                self.ax.scatter(
                     thetas,
                     laser,
-                    linewidth=1.2,
+                    s=12,
                     color="tab:green",
                     label="Láser ToF"
                 )
                 hay_senales = True
 
             if self.var_fusion.get():
-                self.ax.plot(
+                self.ax.scatter(
                     thetas,
                     fusion,
-                    linewidth=2.0,
+                    s=16,
                     color="tab:red",
                     label="Fusión"
                 )
