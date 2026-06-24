@@ -46,8 +46,7 @@ PASOS_VUELTA = 200
 PRIMER_DATO_ES_PASO = True
 
 # Tamaño de ventana del filtro de media móvil
-VENTANA_MEDIA_MOVIL = 1
-
+VENTANA_MEDIA_MOVIL = 2
 
 class App:
     def __init__(self, root):
@@ -587,14 +586,19 @@ class App:
 
     # ---------------- Fusion ----------------
     def calcular_fusion(self, d_us, d_ir, d_laser):
+
+        if d_laser >= 110:
+            peso_us = 0.8
+            peso_ir = 0.0
+            peso_laser = 0.2
         if d_laser <= 30:
             peso_us = 0.0
             peso_ir = 0.3
             peso_laser = 0.7
         else:
-            peso_us = 0.0
+            peso_us = 0.2
             peso_ir = 0.0
-            peso_laser = 1.0
+            peso_laser = 0.8
 
         fusion = (
             peso_us * d_us +
