@@ -46,7 +46,7 @@ PASOS_VUELTA = 200
 PRIMER_DATO_ES_PASO = True
 
 # Tamaño de ventana del filtro de media móvil
-VENTANA_MEDIA_MOVIL = 2
+VENTANA_MEDIA_MOVIL = 1
 
 
 class App:
@@ -74,12 +74,20 @@ class App:
 
         self.angulo_anterior = None
 
+        # Último punto actual para dibujar el rayo
+        self.ultimo_theta = None
+        self.ultimo_us = None
+        self.ultimo_ir = None
+        self.ultimo_laser = None
+        self.ultimo_fusion = None
+
         # Mapa visual persistente
         # Este NO se borra al cambiar de vuelta.
         # Se va sobreescribiendo punto por punto.
         self.mapa_angulos_deg = [
             i * 360.0 / PASOS_VUELTA for i in range(PASOS_VUELTA)
         ]
+
         self.mapa_thetas = [
             math.radians(a) for a in self.mapa_angulos_deg
         ]
@@ -194,7 +202,7 @@ class App:
         # ---------------- Rango configurable ----------------
         frame_rango = ttk.LabelFrame(
             panel,
-            text="Escala radial",
+            text="Escala del mapa",
             style="Card.TLabelframe",
             padding=10
         )
@@ -370,25 +378,10 @@ class App:
         color_accent = "#2563EB"
         color_accent_hover = "#1D4ED8"
 
-        style.configure(
-            "Main.TFrame",
-            background=color_bg
-        )
-
-        style.configure(
-            "Sidebar.TFrame",
-            background=color_sidebar
-        )
-
-        style.configure(
-            "Chart.TFrame",
-            background=color_card
-        )
-
-        style.configure(
-            "CardInner.TFrame",
-            background=color_card
-        )
+        style.configure("Main.TFrame", background=color_bg)
+        style.configure("Sidebar.TFrame", background=color_sidebar)
+        style.configure("Chart.TFrame", background=color_card)
+        style.configure("CardInner.TFrame", background=color_card)
 
         style.configure(
             "Title.TLabel",
@@ -440,17 +433,8 @@ class App:
             font=("Segoe UI", 10, "bold")
         )
 
-        style.configure(
-            "TCombobox",
-            padding=4,
-            font=("Segoe UI", 9)
-        )
-
-        style.configure(
-            "TEntry",
-            padding=5,
-            font=("Segoe UI", 9)
-        )
+        style.configure("TCombobox", padding=4, font=("Segoe UI", 9))
+        style.configure("TEntry", padding=5, font=("Segoe UI", 9))
 
         style.configure(
             "Accent.TButton",
@@ -680,6 +664,13 @@ class App:
         self.laser_filtrado.append(d_laser_f)
         self.fusion_filtrada.append(fusion)
 
+        # Último punto actual para el rayo
+        self.ultimo_theta = math.radians(angulo)
+        self.ultimo_us = d_us_f
+        self.ultimo_ir = d_ir_f
+        self.ultimo_laser = d_laser_f
+        self.ultimo_fusion = fusion
+
         self.mapa_angulos_deg[indice_mapa] = angulo
         self.mapa_thetas[indice_mapa] = math.radians(angulo)
 
@@ -809,7 +800,7 @@ class App:
         except OSError as e:
             messagebox.showerror("Error", str(e))
 
-    # ---------------- Grafico ----------------
+    # ---------------- Grafico polar ----------------
     def actualizar_grafico(self):
         if self.mostrando_vuelta_guardada:
             idx = self.combo_vueltas.current()
@@ -847,6 +838,8 @@ class App:
         self.ax.clear()
 
         self.ax.set_facecolor("#F8FAFC")
+
+        # 0° hacia arriba y giro horario
         self.ax.set_theta_zero_location("N")
         self.ax.set_theta_direction(-1)
 
@@ -855,6 +848,7 @@ class App:
 
         self.ax.grid(color="#CBD5E1", linewidth=0.8, alpha=0.8)
         self.ax.tick_params(colors="#334155")
+
         self.ax.set_title(
             titulo,
             fontsize=13,
@@ -873,6 +867,8 @@ class App:
             self.mapa_laser,
             self.mapa_fusion
         )
+
+        self.dibujar_rayo_actual()
 
     def dibujar_vuelta(self, vuelta):
         self.configurar_grafico(vuelta["nombre"])
@@ -967,6 +963,55 @@ class App:
 
         self.canvas.draw_idle()
 
+    def obtener_radio_para_rayo(self):
+        if self.var_fusion.get() and self.ultimo_fusion is not None:
+            return self.ultimo_fusion
+
+        if self.var_laser.get() and self.ultimo_laser is not None:
+            return self.ultimo_laser
+
+        if self.var_ir.get() and self.ultimo_ir is not None:
+            return self.ultimo_ir
+
+        if self.var_us.get() and self.ultimo_us is not None:
+            return self.ultimo_us
+
+        if self.ultimo_fusion is not None:
+            return self.ultimo_fusion
+
+        return None
+
+    def dibujar_rayo_actual(self):
+        if self.ultimo_theta is None:
+            return
+
+        radio = self.obtener_radio_para_rayo()
+
+        if radio is None:
+            return
+
+        self.ax.plot(
+            [self.ultimo_theta, self.ultimo_theta],
+            [0, radio],
+            color="#111827",
+            linewidth=2.0,
+            linestyle="--",
+            alpha=0.9,
+            zorder=5
+        )
+
+        self.ax.scatter(
+            [self.ultimo_theta],
+            [radio],
+            s=65,
+            color="#111827",
+            edgecolors="white",
+            linewidths=1.0,
+            zorder=6
+        )
+
+        self.canvas.draw_idle()
+
     # ---------------- Limpiar ----------------
     def limpiar(self):
         self.limpiar_actual(
@@ -988,6 +1033,12 @@ class App:
         self.buffer_laser.clear()
 
         self.angulo_anterior = None
+
+        self.ultimo_theta = None
+        self.ultimo_us = None
+        self.ultimo_ir = None
+        self.ultimo_laser = None
+        self.ultimo_fusion = None
 
         self.lbl_fusion.config(text="Fusión: -- cm")
 

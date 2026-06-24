@@ -65,14 +65,14 @@ float medicionSHARP() {
 }
 
 void setup() {
-  Serial.begin(9600);
-  Serial1.begin(9600);
+  Serial.begin(9600);     // Monitor serial para depuración
+  Serial1.begin(9600);    // Comunicación hacia el Arduino del stepper
 
   setupVL53L0X();
 }
 
 void loop() {
-  delay(165);
+  delay(160);
 
   float d_us = medicionUltrasonico();
   float d_ir = medicionSHARP();
@@ -82,11 +82,11 @@ void loop() {
   float d_ir_1 = medicionSHARP();
   float d_laser_1 = medicionVL53L0X();
 
-  d_us = (d_us+d_us_1)/2;
-  d_ir = (d_ir+d_ir_1)/2;
-  d_laser = (d_laser+d_laser)/2;
+  d_us = (d_us + d_us_1) / 2.0;
+  d_ir = (d_ir + d_ir_1) / 2.0;
+  d_laser = (d_laser + d_laser_1) / 2.0;
 
-  // Orden correcto:
+  // Orden:
   // US, IR, LASER
   Serial1.print(d_us);
   Serial1.print(",");
@@ -95,4 +95,11 @@ void loop() {
   Serial1.print(",");
 
   Serial1.println(d_laser);
+
+  //Serial.print("US: ");
+  //Serial.print(d_us);
+  //Serial.print(" | IR: ");
+  //Serial.print(d_ir);
+  //Serial.print(" | LASER: ");
+  //Serial.println(d_laser);
 }

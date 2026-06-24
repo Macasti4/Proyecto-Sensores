@@ -15,8 +15,8 @@ int faseStepper = 0;
 String datosSensores = "";
 
 void setup() {
-  Serial.begin(9600);    // Hacia la PC / GUI
-  Serial2.begin(9600);   // Recibe datos del Arduino de sensores
+  Serial.begin(9600);     // Hacia la PC / GUI
+  Serial1.begin(9600);    // Recibe datos del Arduino de sensores
 
   pinMode(A_IN1, OUTPUT);
   pinMode(A_IN2, OUTPUT);
@@ -94,13 +94,15 @@ void moverUnPasoAdelante() {
 }
 
 void loop() {
-  while (Serial2.available()) {
-    char c = Serial2.read();
+  while (Serial1.available()) {
+    char c = Serial1.read();
 
     if (c == '\n') {
       datosSensores.trim();
 
       if (datosSensores.length() > 0) {
+        // Formato hacia la GUI:
+        // pasoMotor,US,IR,LASER
         Serial.print(pasoMotor);
         Serial.print(",");
         Serial.println(datosSensores);
@@ -113,5 +115,4 @@ void loop() {
       datosSensores += c;
     }
   }
-
 }
