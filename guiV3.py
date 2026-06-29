@@ -313,13 +313,6 @@ class App:
 
         ttk.Button(
             frame_vueltas,
-            text="Exportar vueltas CSV",
-            command=self.exportar_csv,
-            style="Secondary.TButton"
-        ).pack(fill=tk.X, pady=3)
-
-        ttk.Button(
-            frame_vueltas,
             text="Cargar vueltas CSV",
             command=self.cargar_csv,
             style="Secondary.TButton"
